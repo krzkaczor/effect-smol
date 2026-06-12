@@ -352,8 +352,16 @@ function isMissingDataOnly(issue: SchemaIssue.Issue): boolean {
     case "Forbidden":
       return false
     case "Composite":
-    case "AnyOf":
       return issue.issues.every(isMissingDataOnly)
+    case "AnyOf":
+      // An `AnyOf` with no sub-issues means no union member was even attempted.
+      // That happens both when the key is missing (`actual === undefined`) and
+      // when a present value matches no member (e.g. a misspelled literal). Only
+      // the former is missing data; a present invalid value must not be treated
+      // as eligible for a default value.
+      return issue.issues.length > 0
+        ? issue.issues.every(isMissingDataOnly)
+        : issue.actual === undefined
   }
 }
 
