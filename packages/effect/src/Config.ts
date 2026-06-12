@@ -345,8 +345,12 @@ function isMissingDataOnly(issue: SchemaIssue.Issue): boolean {
         ? true
         : isMissingDataOnly(issue.issue)
     case "Pointer":
-    case "Filter":
       return isMissingDataOnly(issue.issue)
+    case "Filter":
+      // A `Filter` is a refinement failure, which only happens on a value that
+      // already decoded successfully. The value is therefore always present, so
+      // it is never missing data, regardless of what the inner issue reports.
+      return false
     case "UnexpectedKey":
       return false
     case "Forbidden":

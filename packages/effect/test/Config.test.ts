@@ -338,12 +338,12 @@ describe("Config", () => {
       })
 
       // Sibling bug to #2384 in `isMissingDataOnly`: the `case "Filter"` branch
-      // recurses into the inner issue and ignores the filter's own `actual`. A
-      // refinement only ever runs on a value that already decoded successfully,
-      // so a refinement failure is *never* missing data. But when the check
-      // reports an issue that carries no `actual` (here an `InvalidValue` with
-      // `Option.none()`), `isMissingDataOnly` misclassifies the present value as
-      // missing and `withDefault` silently swallows it.
+      // used to recurse into the inner issue and ignore the filter's own
+      // `actual`. A refinement only ever runs on a value that already decoded
+      // successfully, so a refinement failure is *never* missing data. When the
+      // check reported an issue that carries no `actual` (here an `InvalidValue`
+      // with `Option.none()`), the present value was misclassified as missing
+      // and `withDefault` silently swallowed it.
       it("refinement failure on a present value must not fall back to default", async () => {
         const schema = Schema.String.check(
           Schema.makeFilter((s) =>
