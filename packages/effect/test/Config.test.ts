@@ -318,6 +318,25 @@ describe("Config", () => {
         )
       })
 
+      // https://github.com/Effect-TS/effect-smol/issues/2384
+      it("literals (invalid present value must not fall back to default)", async () => {
+        const config = Config.literals(["development", "production"], "a").pipe(
+          Config.withDefault("development")
+        )
+
+        // missing key -> default
+        await assertSuccess(config, ConfigProvider.fromUnknown({}), "development")
+        // valid present value -> parsed
+        await assertSuccess(config, ConfigProvider.fromUnknown({ a: "production" }), "production")
+        // invalid present value must fail, not silently use the default
+        await assertFailure(
+          config,
+          ConfigProvider.fromUnknown({ a: "staging" }),
+          `Expected "development" | "production", got "staging"
+  at ["a"]`
+        )
+      })
+
       it("redacted", async () => {
         const defaultValue = Redacted.make("default")
         const config = Config.redacted("a").pipe(Config.withDefault(defaultValue))
